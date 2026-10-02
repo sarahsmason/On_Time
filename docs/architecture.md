@@ -27,7 +27,7 @@ See [scheduling-model.md](scheduling-model.md).
   wait in a queue and come up the next time the user talks to Alexa+ or opens the web view.
 - **The user approves every change.** On Time never changes a routine without a yes.
 - **Every time explains itself**, factor by factor, e.g. "sunset 6:28 − 20 min, + 15 min you
-  confirmed, + 10 min DST glide (day 1 of 6)".
+  confirmed, + 15 min DST glide (day 1 of 4)".
 - **A time-travel clock** makes 30 days of behavior and the DST transition demoable in minutes.
 
 ## Specs

@@ -59,7 +59,7 @@ Every item has an automated test in `tests/test_transport.py`.
 **Tasks**
 - Harden the transport: Origin allow-list (T6), version check (T7), bearer auth (T9), stateless mode (T10)
 - Data model (see [scheduling-model.md](scheduling-model.md)): location, lights, routines (clock or solar anchor + learned offset), adjustment log, check-ins
-- Simulated lights: bedroom, living room, kitchen, porch (state: on/off, brightness, warmth)
+- Simulated lights: bedroom, living room, kitchen, porch (state: on/off)
 - Location from device (host-supplied) or user input (city / ZIP / lat-lon) → lat/lon + IANA timezone
 - **Tools** (clear descriptions and JSON schemas for Alexa+ / LLM tool selection):
   `set_location`, `get_location`, `list_lights`, `set_light`, `get_schedule`, `explain_light_time`,
@@ -69,11 +69,29 @@ Every item has an automated test in `tests/test_transport.py`.
 
 **Artifacts:** `v0.1` tag · full transport test suite green (T1–T9) · README "Run locally" section · Inspector screenshots for the write-up
 
+### Week 1 task list (Sun Oct 4 – Thu Oct 8)
+Decisions: lights are **on/off only**; DST glide default **4 days × 15 min**.
+
+| Day | Build | Done when |
+|---|---|---|
+| **Sun Oct 4** · Data model | Pydantic models: `Location`, `Light`, `Routine` (clock or solar anchor, on/off, learned offset), `Adjustment`, `CheckIn`. SQLite repository behind an interface (DynamoDB later). `Clock` service with demo override. | Model and repository unit tests pass |
+| **Mon Oct 5** · Location + lights | `set_location` / `get_location`: city/ZIP or lat/lon from user input, or device location passed by the host → lat/lon + IANA timezone. Simulated lights (bedroom, living room, kitchen, porch). `list_lights`, `set_light` (logs each change with its offset from the scheduled time). | Tools work in tests and MCP Inspector |
+| **Tue Oct 6** · Schedule (factor 1) | `get_schedule`: clock anchors + sunrise/sunset anchors via `astral`. `explain_light_time` with a factor breakdown (DST and learned show 0 until Phase 2). `plan_dst_transition`: find the next DST change for the user's timezone. | Sunset times match a reference source; next change = Nov 1, 2026 for New York |
+| **Wed Oct 7** · Auth + check-ins + demo clock | Bearer-token auth (**T9**): 401 without a token. Check-in queue plumbing: `get_checkins`, `respond_to_checkin` (accept / adjust / decline + 14-day mute). `set_demo_clock` (only when demo mode is on). | T9 test passes; check-in round-trip test passes |
+| **Thu Oct 8** · Seed + v0.1 | Seed script: 30 days of adjustments with clear patterns (living room on ~20 min early on weekday evenings; porch on-times tracking sunset). Full test run, Inspector pass over all tools, README update, tag **`v0.1`**. | `v0.1` tagged and pushed |
+
+**Your tasks this week**
+- [ ] AWS Settings: MFA on your sign-in, spend limit (e.g. $25)
+- [ ] Save the Inspector screenshots (Connected · MCP 2025-11-25, and `ping_time` result)
+- [ ] Fill in `docs/product-feedback.md` for MCP Python SDK and MCP Inspector while it's fresh
+- [ ] GitHub topics (optional)
+- [ ] Review each day's push (about 10 min/day) and flag anything that doesn't match how you'd use it
+
 ## Phase 2: Intelligence engine (Oct 9 – Oct 12)
 **Resources:** `astral` (sunrise/sunset), `zoneinfo` (DST)
 **Tasks**
 - **Factor 1, base time:** clock anchors and solar anchors (sunrise/sunset ± offset at the user's location)
-- **Factor 2, DST glide:** step clock-anchored light routines 60/N min/day across the N days before a change (default 6; fall-back Nov 1, 2026)
+- **Factor 2, DST glide:** step clock-anchored light routines 15 min/day across the 4 days before a change (fall-back Nov 1, 2026: Oct 28–31)
 - **Factor 3, learned offset:** detect consistent deviations in ad-hoc adjustments (support + confidence + evidence), including "track sunset instead of the clock"
 - Check-in queue: pending → accepted / adjusted / declined (declined suppressed 14 days)
 - Pull-based surfacing: tool results carry pending check-ins (servers cannot start conversations)

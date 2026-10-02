@@ -10,12 +10,12 @@ effective_time(routine, day) = base_time(routine, day)          # 1. clock or su
 ```
 
 ## The routine
-A routine is a scheduled lighting action, e.g. "Bedroom lights warm-on, 30%, at wake time".
+A routine is a scheduled lighting action, e.g. "Bedroom lights on at wake time".
 
 | Field | Example |
 |---|---|
 | lights | `bedroom`, `living_room` |
-| action | `on` / `dim` / `off`, brightness %, optional warmth |
+| action | `on` / `off` (on/off only; brightness and warmth are out of scope) |
 | anchor | `clock 06:30` **or** `solar sunset -20m` / `solar sunrise +0m` |
 | learned_offset | `+15m` (only after the user confirms in a check-in) |
 
@@ -32,9 +32,10 @@ A routine is a scheduled lighting action, e.g. "Bedroom lights warm-on, 30%, at 
 Clocks jump an hour; people adjust better in small steps.
 
 - **Applies to clock-anchored routines.** Solar routines already follow the sun, so On_Time only explains their apparent one-hour clock jump.
-- **Fall back** (e.g. Nov 1, 2026): over the N days *before* the change (default 6), shift the routine **later** by 60/N minutes per day. By the eve of the change it sits +60 min (old clock), which equals the original time on the new clock. After the change the offset is 0.
-- **Spring forward:** the mirror image, stepping **earlier**.
-- The plan is proposed in a check-in ("DST ends Sunday. Want me to ease your bedroom lights 10 minutes a day this week?"), never applied silently.
+- **Default: 4 days at 15 minutes per day.**
+- **Fall back** (e.g. Sun Nov 1, 2026): on the 4 days *before* the change (Wed Oct 28 to Sat Oct 31), shift the routine **later** by +15, +30, +45, +60 min. By the eve of the change it sits +60 min (old clock), which equals the original time on the new clock. From the change on, the offset is 0.
+- **Spring forward:** the mirror image, stepping **earlier** by 15 min/day.
+- The plan is proposed in a check-in ("Daylight Saving Time ends Sunday. Want me to ease your bedroom lights 15 minutes a day starting Wednesday?"), never applied silently.
 
 ## Factor 3: Learned adjustments from conversational check-ins
 - Every ad-hoc light change ("Alexa, dim the living room") is logged with its time and the scheduled time it deviated from.
@@ -60,7 +61,7 @@ Clocks jump an hour; people adjust better in small steps.
 |---|---|
 | `set_location` / `get_location` | Location and timezone from device or user input |
 | `list_lights` | Lights and their current state |
-| `set_light` | Ad-hoc change (on/off/dim/warmth); logged as evidence |
+| `set_light` | Ad-hoc on/off; logged as evidence |
 | `get_schedule` | Effective routine times for a date, with factor breakdown |
 | `explain_light_time` | "Why will the bedroom lights come on at 6:40?" |
 | `get_checkins` | Pending conversational check-ins with evidence |
