@@ -5,10 +5,12 @@ Agentic Alexa+ skill, using Python MCP server on AWS, that adapts your lights to
 > Your home's schedule, kept in step with your life, the seasons, and the clock.
 
 On Time is a self-hosted **MCP server** (spec 2025-11-25, Streamable HTTP) for Alexa+ that:
-- **Learns habits** from your ad-hoc requests and proposes routines, explaining why
-- **Tracks seasonal drift** and re-anchors schedules to sunrise and sunset
-- **Glides through Daylight Saving Time** by shifting alarms, lights, and thermostat 10–15 minutes a day
-- **Asks before changing anything**
+- **Follows the sun** by anchoring light routines to sunrise and sunset at your location (from your device or what you tell it)
+- **Glides through Daylight Saving Time** by shifting light routines a few minutes a day before the change
+- **Learns from your adjustments**, then checks in conversationally before changing a routine
+- **Explains every time** factor by factor, and never changes a routine without a yes
+
+See [docs/scheduling-model.md](docs/scheduling-model.md).
 
 Built for the *Build, Ship, Shape: Amazon Developer Hackathon*, Alexa+ track.
 

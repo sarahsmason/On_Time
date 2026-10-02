@@ -1,8 +1,9 @@
 # On Time: Architecture
 
-An agentic lighting and schedule assistant for Alexa+. It learns habits from ad-hoc requests, tracks
-seasonal (sunrise/sunset) drift, and plans gradual Daylight Saving Time transitions. It proposes
-schedule changes, and the user approves each one.
+An agentic **lighting** assistant for Alexa+. Each light routine's time combines three factors:
+a gradual shift around Daylight Saving Time changes, sunrise/sunset at the user's location (from the
+device or user input), and adjustment patterns the user confirms in conversational check-ins.
+See [scheduling-model.md](scheduling-model.md).
 
 ```
 [Simulated Alexa+ web app]  voice (browser speech) + chat + cards/timeline + time-travel clock
@@ -10,20 +11,23 @@ schedule changes, and the user approves each one.
 [Agent: Strands SDK + Claude Haiku 4.5 on Amazon Bedrock (us-east-2)]
           │  MCP client (Streamable HTTP, spec 2025-11-25)
 [On Time MCP server (Python, official `mcp` SDK)]
-   tools: log_action, get_suggestions, apply_change, plan_dst_glide,
-          get_schedule, preview_season_drift
+   tools: set_location, list_lights, set_light, get_schedule, explain_light_time,
+          get_checkins, respond_to_checkin, plan_dst_transition, set_demo_clock
           │
-[Engine]  habit detection · sunrise/sunset (astral) · DST glide planner · suggestion queue
+[Engine]  base time (clock | sunrise/sunset via astral) + DST glide + learned offset
+          adjustment-pattern detector · check-in queue
           │
-[Device layer]  Simulated hub (demo)  →  later: Home Assistant / real devices
+[Device layer]  Simulated lights (demo)  →  later: Home Assistant / real lights
 [Store]  SQLite (local)  →  DynamoDB (AWS)
 ```
 
 ## Key design decisions
-- **Suggestions are pulled, not pushed.** An MCP server can't start a conversation, so suggestions
-  wait in a queue and are shown the next time the user interacts with Alexa+ or opens the web view.
-- **The user approves every change.** On Time never changes a schedule without a yes.
-- **Every suggestion explains itself**, e.g. "5 of the last 7 weekdays around 6:40am".
+- **Lights only.** Narrow scope, easy to demo, and easy to connect to real lights later.
+- **Check-ins are pulled, not pushed.** An MCP server can't start a conversation, so check-ins
+  wait in a queue and come up the next time the user talks to Alexa+ or opens the web view.
+- **The user approves every change.** On Time never changes a routine without a yes.
+- **Every time explains itself**, factor by factor, e.g. "sunset 6:28 − 20 min, + 15 min you
+  confirmed, + 10 min DST glide (day 1 of 6)".
 - **A time-travel clock** makes 30 days of behavior and the DST transition demoable in minutes.
 
 ## Specs

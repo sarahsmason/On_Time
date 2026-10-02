@@ -58,11 +58,13 @@ Every item has an automated test in `tests/test_transport.py`.
 **Resources:** `mcp` SDK, `pydantic`, SQLite, `pytest`, `httpx`, MCP Inspector
 **Tasks**
 - Harden the transport: Origin allow-list (T6), version check (T7), bearer auth (T9), stateless mode (T10)
-- Data model: devices, schedules, action log, suggestions
-- Simulated hub: lights (primary), alarm, thermostat
-- **Tools** (with clear descriptions and JSON schemas for Alexa+ / LLM tool selection):
-  `log_action`, `get_schedule`, `get_suggestions`, `apply_change`, `decline_suggestion`, `plan_dst_glide`, `preview_season_drift`
-- Seed script: 30 days of realistic history
+- Data model (see [scheduling-model.md](scheduling-model.md)): location, lights, routines (clock or solar anchor + learned offset), adjustment log, check-ins
+- Simulated lights: bedroom, living room, kitchen, porch (state: on/off, brightness, warmth)
+- Location from device (host-supplied) or user input (city / ZIP / lat-lon) → lat/lon + IANA timezone
+- **Tools** (clear descriptions and JSON schemas for Alexa+ / LLM tool selection):
+  `set_location`, `get_location`, `list_lights`, `set_light`, `get_schedule`, `explain_light_time`,
+  `get_checkins`, `respond_to_checkin`, `plan_dst_transition`, `set_demo_clock`
+- Seed script: 30 days of realistic ad-hoc light adjustments with a few clear patterns
 - Time-travel clock (server-side "now" override, used only in demo mode)
 
 **Artifacts:** `v0.1` tag · full transport test suite green (T1–T9) · README "Run locally" section · Inspector screenshots for the write-up
@@ -70,11 +72,12 @@ Every item has an automated test in `tests/test_transport.py`.
 ## Phase 2: Intelligence engine (Oct 9 – Oct 12)
 **Resources:** `astral` (sunrise/sunset), `zoneinfo` (DST)
 **Tasks**
-- Habit detection: cluster ad-hoc actions by time-of-day and weekday, with a confidence score and a "why" string
-- Seasonal drift: detect routines whose anchor (e.g. "evening") has moved relative to sunset
-- DST glide planner: 10–15 min/day steps across lights, alarm, thermostat (fall-back Nov 1, 2026)
-- Suggestion queue: pending → approved/declined; declined patterns are suppressed
-- Pull-based surfacing: tool results carry a pending-suggestion count (servers cannot start conversations)
+- **Factor 1, base time:** clock anchors and solar anchors (sunrise/sunset ± offset at the user's location)
+- **Factor 2, DST glide:** step clock-anchored light routines 60/N min/day across the N days before a change (default 6; fall-back Nov 1, 2026)
+- **Factor 3, learned offset:** detect consistent deviations in ad-hoc adjustments (support + confidence + evidence), including "track sunset instead of the clock"
+- Check-in queue: pending → accepted / adjusted / declined (declined suppressed 14 days)
+- Pull-based surfacing: tool results carry pending check-ins (servers cannot start conversations)
+- `explain_light_time`: factor-by-factor breakdown for any routine and date
 
 **Artifacts:** `v0.2` tag · engine tests (DST boundary days, midnight wrap, weekends)
 
@@ -108,7 +111,7 @@ Every item has an automated test in `tests/test_transport.py`.
 ## Phase 5: Submission (Oct 20 – Oct 22)
 **Artifacts**
 1. Final README: one-command local run, deployed URL, judge credentials, architecture diagram, **spec compliance table (T1–T11)**
-2. Demo video < 3 min (YouTube): problem → habit card → seasonal drift → DST glide timeline → architecture/AWS → close
+2. Demo video < 3 min (YouTube): problem → set location → check-in from adjustment pattern → sunset-anchored lights → DST glide timeline → architecture/AWS → close
 3. Devpost description mapped to the judging rubric
 4. Product feedback for each tool (MCP SDK, Inspector, MCP Apps, Strands, Bedrock, AgentCore, DynamoDB, Alexa+)
 5. Friction log (cleaned up), feature requests
