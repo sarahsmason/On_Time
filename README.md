@@ -24,6 +24,7 @@ Built for the *Build, Ship, Shape: Amazon Developer Hackathon*, Alexa+ track.
 _Coming in v0.1._
 
 ## Project docs
+- [Build plan](docs/plan.md)
 - [Architecture](docs/architecture.md)
 - [Friction log](docs/friction-log.md)
 - [Product feedback](docs/product-feedback.md)
