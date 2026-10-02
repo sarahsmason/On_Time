@@ -29,9 +29,10 @@ uv run on-time          # MCP server at http://127.0.0.1:8000/mcp (Streamable HT
 uv run pytest           # spec 2025-11-25 transport compliance tests
 ```
 
-Inspect it with [MCP Inspector](https://github.com/modelcontextprotocol/inspector): run
-`npx @modelcontextprotocol/inspector`, choose **Streamable HTTP**, and connect to
-`http://127.0.0.1:8000/mcp`.
+Inspect it with [MCP Inspector](https://github.com/modelcontextprotocol/inspector) v2:
+run `npx @modelcontextprotocol/inspector` (in Windows PowerShell use `npx.cmd`), then
+**Add Servers → + Add manually** with transport `streamable-http` and URL
+`http://127.0.0.1:8000/mcp`, toggle it on, and open **Tools → ping_time → Execute Tool**.
 
 | Env var | Default | Purpose |
 |---|---|---|

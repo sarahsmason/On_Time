@@ -49,7 +49,7 @@ Every item has an automated test in `tests/test_transport.py`.
 - [ ] AWS Settings: MFA on sign-in, spend limit
 - [x] **Hello-world MCP server** (`/mcp`, one `ping_time` tool), MCP Python SDK 2.2.0
 - [x] **Spec spike:** SDK negotiates 2025-11-25; T1–T8 and T10 covered by `tests/test_transport.py` (10 passing)
-- [ ] Verify in MCP Inspector
+- [x] Verified in MCP Inspector v2.9.0: connected as "MCP 2025-11-25"; `ping_time` OK
 - [ ] GitHub topics (optional)
 
 **Artifacts:** `server/` hello world · `tests/test_transport.py` (first checks) · first friction log entries
