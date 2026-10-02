@@ -1,0 +1,25 @@
+[project]
+name = "on-time"
+version = "0.1.0"
+description = "Alexa+ MCP server that adapts home lighting schedules to habits, seasons, and Daylight Saving Time"
+authors = [
+    { name = "sarahsmason", email = "68719135+sarahsmason@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "mcp[cli]>=2.2.0",
+    "tzdata>=2026.4",
+]
+
+[project.scripts]
+on-time = "on_time:main"
+
+[build-system]
+requires = ["uv_build>=0.12.21,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.1.1",
+]

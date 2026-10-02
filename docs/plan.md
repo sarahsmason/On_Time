@@ -28,7 +28,7 @@ Every item has an automated test in `tests/test_transport.py`.
 | T2 | `initialize` negotiates `protocolVersion: 2025-11-25` | MUST (rules) | Assert in tests |
 | T3 | POST request → `application/json` or `text/event-stream` | MUST | Stateless + JSON responses |
 | T4 | Notification/response POST → `202 Accepted` | MUST | SDK; asserted in tests |
-| T5 | GET → SSE stream **or** `405` | MUST | 405 (stateless, no server push) |
+| T5 | GET → SSE stream **or** `405` | MUST | SSE stream (SDK default; compliant). No server push used. |
 | T6 | Invalid `Origin` → `403` | MUST | Allow-list middleware |
 | T7 | Unsupported `MCP-Protocol-Version` → `400` | MUST | SDK or middleware; asserted |
 | T8 | Bind to `127.0.0.1` when local | SHOULD | Default host setting |
@@ -47,8 +47,9 @@ Every item has an automated test in `tests/test_transport.py`.
 - [x] AWS Agent Toolkit installed (AWS MCP server + skills; rules in `CLAUDE.md`)
 - [x] Bedrock: Anthropic use-case form accepted; Haiku 4.5 quota raised; test call succeeds
 - [ ] AWS Settings: MFA on sign-in, spend limit
-- [ ] **Hello-world MCP server** (`/mcp`, one `ping_time` tool), verified in MCP Inspector
-- [ ] **Spec spike:** confirm the SDK negotiates 2025-11-25; prototype checks T2, T6, T7
+- [x] **Hello-world MCP server** (`/mcp`, one `ping_time` tool), MCP Python SDK 2.2.0
+- [x] **Spec spike:** SDK negotiates 2025-11-25; T1–T8 and T10 covered by `tests/test_transport.py` (10 passing)
+- [ ] Verify in MCP Inspector
 - [ ] GitHub topics (optional)
 
 **Artifacts:** `server/` hello world · `tests/test_transport.py` (first checks) · first friction log entries

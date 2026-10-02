@@ -21,7 +21,26 @@ Built for the *Build, Ship, Shape: Amazon Developer Hackathon*, Alexa+ track.
 - An AWS account with Amazon Bedrock access (for the agent and deployment)
 
 ## Quick start
-_Coming in v0.1._
+Requires [uv](https://docs.astral.sh/uv/).
+
+```bash
+uv sync
+uv run on-time          # MCP server at http://127.0.0.1:8000/mcp (Streamable HTTP)
+uv run pytest           # spec 2025-11-25 transport compliance tests
+```
+
+Inspect it with [MCP Inspector](https://github.com/modelcontextprotocol/inspector): run
+`npx @modelcontextprotocol/inspector`, choose **Streamable HTTP**, and connect to
+`http://127.0.0.1:8000/mcp`.
+
+| Env var | Default | Purpose |
+|---|---|---|
+| `ON_TIME_HOST` | `127.0.0.1` | Bind address (localhost only by default) |
+| `ON_TIME_PORT` | `8000` | Port |
+| `ON_TIME_ALLOWED_ORIGINS` | _(none)_ | Extra comma-separated browser origins allowed past Origin validation |
+
+> **Windows + OneDrive:** keep the virtual environment out of the synced folder with
+> `$env:UV_PROJECT_ENVIRONMENT = "$env:USERPROFILE\.venvs\on-time"` before running `uv`.
 
 ## Project docs
 - [Build plan](docs/plan.md)
