@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>On Time timeline</title>
+    <style>/*ON_TIME_STYLE*/</style>
+    <style>
+      .timeline { list-style: none; margin: 4px 0 0; padding: 0 0 0 14px; border-left: 2px solid var(--color-border-primary); }
+      .timeline li { position: relative; padding: 0 0 12px 12px; }
+      .timeline li::before {
+        content: ""; position: absolute; left: -21px; top: 4px; width: 12px; height: 12px; border-radius: 50%;
+        background: var(--color-background-secondary); border: 2px solid var(--color-text-warning);
+      }
+      .timeline li.off::before { border-color: var(--color-text-secondary); }
+      .time { font-weight: 700; font-variant-numeric: tabular-nums; }
+      .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+      .tag { font-size: 11.5px; border: 1px solid var(--color-border-primary); border-radius: 999px; padding: 1px 8px; color: var(--color-text-secondary); }
+      .tag.sun { border-color: var(--color-text-warning); color: var(--color-text-warning); }
+      .tag.you { border-color: var(--color-text-success); color: var(--color-text-success); }
+      .steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; align-items: end; height: 120px; margin: 10px 0 4px; }
+      .step { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; gap: 4px; }
+      .bar { width: 70%; border-radius: 6px 6px 2px 2px; background: var(--color-text-warning); opacity: 0.85; }
+      .bar.change { background: var(--color-text-success); }
+      .step b { font-size: 13px; }
+      .step span { font-size: 11px; color: var(--color-text-secondary); }
+    </style>
+  </head>
+  <body>
+    <div class="card"><div id="root" aria-live="polite"><p class="muted">Loading…</p></div><p class="badge">On Time card · MCP Apps</p></div>
+    <script>/*ON_TIME_BRIDGE*/</script>
+    <script>
+      const { el, wallTime, wallDay } = OnTimeCard;
+      const root = document.getElementById("root");
+
+      function factorTags(e) {
+        const [kind, hhmm, sign, minutes] = e.factors.base.detail.split(" ");
+        const tags = [];
+        if (kind === "clock") tags.push(el("span", { class: "tag" }, `set for ${wallTime("0000-00-00T" + hhmm)}`));
+        else tags.push(el("span", { class: "tag sun" }, `${kind} ${wallTime("0000-00-00T" + hhmm)}${sign ? ` ${sign} ${minutes} min` : ""}`));
+        const glide = e.factors.dst_glide_minutes;
+        if (glide) tags.push(el("span", { class: "tag sun" }, `${glide > 0 ? "+" : ""}${glide} min Daylight Saving glide`));
+        const learned = e.factors.learned_offset_minutes;
+        if (learned) tags.push(el("span", { class: "tag you" }, `${learned > 0 ? "+" : ""}${learned} min you chose`));
+        return el("div", { class: "tags" }, tags);
+      }
+
+      function renderSchedule(data) {
+        root.replaceChildren(
+          el("p", { class: "eyebrow" }, "Light schedule"),
+          el("h1", {}, wallDay(data.day + "T00:00", { weekday: "long", month: "long", day: "numeric" })),
+          data.events.length
+            ? el("ol", { class: "timeline" }, data.events.map((e) =>
+                el("li", { class: e.action === "off" ? "off" : "" },
+                  el("span", { class: "time" }, wallTime(e.at)), " · ", `${e.name} (${e.light_ids.join(", ").replaceAll("_", " ")} ${e.action})`,
+                  factorTags(e),
+                )))
+            : el("p", { class: "muted" }, "No routines run this day."),
+          ...(data.problems || []).map((p) => el("p", { class: "error" }, p)),
+        );
+      }
+
+      function renderDst(plan) {
+        if (!plan.next_change) {
+          root.replaceChildren(el("p", { class: "eyebrow" }, "Daylight Saving"), el("h1", {}, plan.note || "No clock change coming up."));
+          return;
+        }
+        const max = Math.max(...plan.glide_preview.map((s) => Math.abs(s.shift_minutes)), 60);
+        const steps = plan.glide_preview.map((s) =>
+          el("div", { class: "step" },
+            el("b", {}, `${s.shift_minutes > 0 ? "+" : ""}${s.shift_minutes}m`),
+            el("div", { class: "bar", style: `height:${Math.round((Math.abs(s.shift_minutes) / max) * 80)}px` }),
+            el("span", {}, wallDay(s.day + "T00:00", { weekday: "short" })),
+          ));
+        steps.push(el("div", { class: "step" },
+          el("b", {}, "new clock"), el("div", { class: "bar change", style: "height:6px" }),
+          el("span", {}, wallDay(plan.next_change.at, { weekday: "short" })),
+        ));
+        const status = el("p", { class: "done", hidden: "" });
+        const glideAsk = plan.next_checkin?.kind === "dst_glide" ? plan.next_checkin : null;
+        const ease = glideAsk
+          ? el("div", { class: "actions" },
+              el("button", { class: "primary", type: "button", onclick: async (ev) => {
+                ev.target.disabled = true;
+                try {
+                  const r = await OnTimeCard.callTool("respond_to_checkin", { checkin_id: glideAsk.id, response: "accept", note: "Accepted in the On Time timeline card" });
+                  OnTimeCard.updateModelContext(`The user accepted the Daylight Saving glide in the On Time card: ${r.summary}`);
+                  status.textContent = r.summary; status.hidden = false; ev.target.closest(".actions").remove();
+                } catch (e) { status.textContent = e.message; status.className = "error"; status.hidden = false; ev.target.disabled = false; }
+              } }, "Ease me in"),
+              el("span", { class: "muted small" }, "Nothing changes unless you say yes."),
+            )
+          : null;
+        root.replaceChildren(
+          el("p", { class: "eyebrow" }, "Daylight Saving glide"),
+          el("h1", {}, plan.next_change.summary + "."),
+          el("p", { class: "muted small" }, plan.glide_summary),
+          el("div", { class: "steps", role: "img", "aria-label": plan.glide_summary }, steps),
+          plan.routines_that_would_glide.length
+            ? el("p", { class: "small" }, "Eases: ", plan.routines_that_would_glide.map((r) => r.name).join(", "))
+            : null,
+          plan.routines_following_the_sun.length
+            ? el("p", { class: "small muted" }, "Already follow the sun: ", plan.routines_following_the_sun.map((r) => r.name).join(", "))
+            : null,
+          ease, status,
+        );
+      }
+
+      OnTimeCard.on("ui/notifications/tool-result", (result) => {
+        const data = result.structuredContent || {};
+        if ("glide_preview" in data || "next_change" in data) renderDst(data);
+        else if ("events" in data) renderSchedule(data);
+        else root.replaceChildren(el("p", { class: "muted" }, result.content?.map((c) => c.text).join(" ") || "Nothing to show."));
+      });
+      OnTimeCard.start("on-time-schedule-timeline");
+    </script>
+  </body>
+</html>

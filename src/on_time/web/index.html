@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Simulated On Time for Alexa+</title>
+    <link rel="icon" href="/web/icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/web/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <img src="/web/icon.svg" alt="" class="brand-mark" />
+        <div>
+          <div class="brand-name">On Time</div>
+          <div class="sim-label" title="Alexa+ add-on tooling is partner-only; this page is a real MCP client standing in for Alexa+.">
+            Simulated On Time for Alexa+
+          </div>
+        </div>
+      </div>
+      <div class="status">
+        <div class="clock">
+          <div id="clock-time" class="clock-time">--:--</div>
+          <div id="clock-meta" class="clock-meta">Location not set</div>
+        </div>
+        <button id="demo-toggle" class="chip" type="button" aria-expanded="false">Demo time</button>
+        <div id="agent-mode" class="chip" title="Which agent chose the last step">Agent: waiting</div>
+        <div id="conn" class="chip conn">Connecting…</div>
+      </div>
+      <div id="demo-panel" class="demo-panel" hidden>
+        <label>Jump to <input id="demo-at" type="datetime-local" /></label>
+        <button id="demo-go" type="button">Go</button>
+        <div class="presets">
+          <button type="button" data-at="2026-10-08T19:30">Oct 8 · evening</button>
+          <button type="button" data-at="2026-10-26T09:00">Oct 26 · DST week</button>
+          <button type="button" data-at="2026-10-29T06:00">Oct 29 · glide day 2</button>
+          <button type="button" data-at="2026-11-02T06:00">Nov 2 · after change</button>
+          <button type="button" data-reset>Real time</button>
+        </div>
+        <p id="demo-note" class="muted small"></p>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel conversation" aria-label="Conversation">
+        <div id="messages" class="messages" aria-live="polite"></div>
+        <div id="suggestions" class="suggestions" aria-label="Try saying">
+          <span class="muted small">Try saying</span>
+          <button type="button">I'm in Oswego, New York</button>
+          <button type="button">Turn on the living room</button>
+          <button type="button">When do my porch lights come on tonight?</button>
+          <button type="button">What happens when daylight saving time ends?</button>
+        </div>
+        <form id="composer" class="composer" autocomplete="off">
+          <button id="mic" class="mic" type="button" title="Speak" aria-label="Speak">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V22h2v-3.08A7 7 0 0 0 19 12h-2Z"/></svg>
+          </button>
+          <input id="say" type="text" placeholder="Try: “I'm in Oswego, New York” or “Turn on the living room”" aria-label="Message" />
+          <button id="speaker" class="mic" type="button" aria-pressed="true" title="Spoken replies on" aria-label="Spoken replies">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9H4Zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4ZM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6Z"/></svg>
+          </button>
+          <button class="send" type="submit">Send</button>
+        </form>
+      </section>
+
+      <aside class="side">
+        <section class="panel" aria-labelledby="lights-h">
+          <h2 id="lights-h">Lights</h2>
+          <div id="lights" class="lights"></div>
+          <p class="muted small">Tap a light to change it by hand. Manual changes are what check-ins learn from.</p>
+        </section>
+
+        <section class="panel" aria-labelledby="checkins-h">
+          <h2 id="checkins-h">Check-ins <span id="checkin-count" class="count"></span></h2>
+          <div id="checkins" class="checkins"></div>
+        </section>
+
+        <section class="panel" aria-labelledby="schedule-h">
+          <h2 id="schedule-h">Schedule <span id="schedule-day" class="muted small"></span></h2>
+          <ol id="schedule" class="schedule"></ol>
+        </section>
+
+        <section class="panel" aria-labelledby="dst-h">
+          <h2 id="dst-h">Daylight Saving Time</h2>
+          <div id="dst"></div>
+        </section>
+      </aside>
+    </main>
+
+    <section class="panel protocol" aria-labelledby="protocol-h">
+      <button id="protocol-toggle" class="protocol-head" type="button" aria-expanded="true">
+        <h2 id="protocol-h">MCP protocol <span class="muted small">Streamable HTTP · this page is the MCP client</span></h2>
+        <span id="protocol-count" class="count"></span>
+      </button>
+      <ol id="protocol" class="protocol-log"></ol>
+    </section>
+
+    <script type="module" src="/web/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>On Time check-in</title>
+    <style>/*ON_TIME_STYLE*/</style>
+    <style>
+      .adjust { display: none; gap: 6px; align-items: center; margin-top: 8px; }
+      .adjust.open { display: flex; }
+    </style>
+  </head>
+  <body>
+    <div class="card"><div id="root" aria-live="polite"><p class="muted">Loading check-ins…</p></div><p class="badge">On Time card · MCP Apps</p></div>
+    <script>/*ON_TIME_BRIDGE*/</script>
+    <script>
+      const { el } = OnTimeCard;
+      const root = document.getElementById("root");
+      const LABEL = { learned_offset: "Your habit", anchor_switch: "Follow the sun", dst_glide: "Daylight Saving" };
+      const ADJUST_HINT = {
+        learned_offset: "Minutes from the routine's set time (negative = earlier)",
+        anchor_switch: "Minutes from sunrise/sunset (negative = before)",
+      };
+
+      function render(checkins, note) {
+        const items = checkins.map((c) => {
+          const minutes = el("input", { type: "number", step: "5", "aria-label": "Minutes", value: String(c.proposal.learned_offset_minutes ?? c.proposal.anchor?.offset_minutes ?? -15) });
+          const adjustRow = el("div", { class: "adjust" },
+            minutes,
+            el("span", { class: "muted small" }, ADJUST_HINT[c.kind] || ""),
+            el("button", { type: "button", onclick: () => answer(c, "adjust", Number(minutes.value)) }, "Save"),
+          );
+          const buttons = el("div", { class: "actions" },
+            el("button", { class: "primary", type: "button", onclick: () => answer(c, "accept") }, "Yes"),
+            c.kind === "dst_glide" ? null : el("button", { type: "button", onclick: () => adjustRow.classList.toggle("open") }, "Adjust…"),
+            el("button", { type: "button", onclick: () => answer(c, "decline") }, "Not now"),
+          );
+          return el("section", { class: "item" },
+            el("p", { class: "eyebrow" }, LABEL[c.kind] || "Check-in"),
+            el("h1", {}, c.question),
+            c.evidence?.length ? el("ul", { class: "evidence" }, c.evidence.map((e) => el("li", {}, e))) : null,
+            buttons, adjustRow,
+          );
+        });
+        root.replaceChildren(
+          ...(note ? [el("p", { class: "done" }, note)] : []),
+          ...(items.length ? items : [el("p", { class: "muted" }, note ? "That's everything for now." : "Nothing to ask right now. Your lights are in step.")]),
+        );
+      }
+
+      async function answer(checkin, response, minutes) {
+        root.querySelectorAll("button").forEach((b) => (b.disabled = true));
+        try {
+          const args = { checkin_id: checkin.id, response, note: "Answered in the On Time card" };
+          if (response === "adjust") args.minutes = minutes;
+          const result = await OnTimeCard.callTool("respond_to_checkin", args);
+          OnTimeCard.updateModelContext(`The user answered a check-in in the On Time card: ${result.summary}`);
+          const { checkins } = await OnTimeCard.callTool("get_checkins");
+          render(checkins, result.summary);
+        } catch (e) {
+          root.append(el("p", { class: "error" }, e.message));
+          root.querySelectorAll("button").forEach((b) => (b.disabled = false));
+        }
+      }
+
+      OnTimeCard.on("ui/notifications/tool-result", (result) => render(result.structuredContent?.checkins || []));
+      OnTimeCard.start("on-time-checkin-card");
+    </script>
+  </body>
+</html>

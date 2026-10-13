@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>On Time card sandbox</title>
+    <style>
+      /* Same color scheme as the host page, or Chrome paints an opaque white canvas behind the frame. */
+      :root { color-scheme: dark; }
+      html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; }
+      iframe { border: 0; width: 100%; height: 100%; display: block; background: transparent; }
+    </style>
+  </head>
+  <body>
+    <script>
+      // MCP Apps sandbox proxy (spec 2026-01-26). Served from a different origin than the host page.
+      // Loads the card's HTML in an inner sandboxed iframe with a restrictive CSP and relays
+      // JSON-RPC messages between host and card, except the reserved ui/notifications/sandbox-* ones.
+      const HOST_ORIGIN = new URLSearchParams(location.search).get("host");
+      const RESERVED = "ui/notifications/sandbox-";
+      let inner = null;
+
+      function cspFor(c = {}) {
+        const list = (domains) => (domains && domains.length ? " " + domains.join(" ") : "");
+        return [
+          "default-src 'none'",
+          `script-src 'unsafe-inline'${list(c.resourceDomains)}`,
+          `style-src 'unsafe-inline'${list(c.resourceDomains)}`,
+          `img-src data:${list(c.resourceDomains)}`,
+          `font-src data:${list(c.resourceDomains)}`,
+          `media-src data:${list(c.resourceDomains)}`,
+          `connect-src ${c.connectDomains && c.connectDomains.length ? c.connectDomains.join(" ") : "'none'"}`,
+          `frame-src ${c.frameDomains && c.frameDomains.length ? c.frameDomains.join(" ") : "'none'"}`,
+          `base-uri ${c.baseUriDomains && c.baseUriDomains.length ? c.baseUriDomains.join(" ") : "'none'"}`,
+          "object-src 'none'",
+        ].join("; ");
+      }
+
+      function withCsp(html, csp) {
+        const tag = `<meta http-equiv="Content-Security-Policy" content="${cspFor(csp)}">`;
+        return /<head[^>]*>/i.test(html) ? html.replace(/<head[^>]*>/i, (m) => m + tag) : tag + html;
+      }
+
+      function load({ html, csp, sandbox }) {
+        inner = document.createElement("iframe");
+        inner.setAttribute("sandbox", sandbox || "allow-scripts allow-forms");
+        inner.setAttribute("title", "On Time card");
+        inner.srcdoc = withCsp(html, csp);
+        document.body.replaceChildren(inner);
+      }
+
+      window.addEventListener("message", (event) => {
+        const msg = event.data;
+        if (!msg || msg.jsonrpc !== "2.0") return;
+        const method = typeof msg.method === "string" ? msg.method : "";
+        if (event.source === window.parent) {
+          if (!HOST_ORIGIN || event.origin !== HOST_ORIGIN) return;
+          if (method === RESERVED + "resource-ready") return load(msg.params || {});
+          if (method.startsWith(RESERVED)) return;
+          inner?.contentWindow?.postMessage(msg, "*");
+        } else if (inner && event.source === inner.contentWindow) {
+          if (method.startsWith(RESERVED)) return;
+          window.parent.postMessage(msg, HOST_ORIGIN);
+        }
+      });
+
+      if (HOST_ORIGIN) window.parent.postMessage({ jsonrpc: "2.0", method: RESERVED + "proxy-ready", params: {} }, HOST_ORIGIN);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+*.egg-info/
+
+# Secrets: never commit these
+.env
+*.pem
+.aws/
+
+# Local data
+*.db
+*.sqlite
+
+# Node (Inspector / frontend tooling)
+node_modules/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
