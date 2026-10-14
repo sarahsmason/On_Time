@@ -90,7 +90,8 @@
               el("span", { class: "muted small" }, "Nothing changes unless you say yes."),
             )
           : null;
-        root.replaceChildren(
+        // Skip empty slots: replaceChildren would print a null as the word "null".
+        root.replaceChildren(...[
           el("p", { class: "eyebrow" }, "Daylight Saving glide"),
           el("h1", {}, plan.next_change.summary + "."),
           el("p", { class: "muted small" }, plan.glide_summary),
@@ -102,7 +103,7 @@
             ? el("p", { class: "small muted" }, "Already follow the sun: ", plan.routines_following_the_sun.map((r) => r.name).join(", "))
             : null,
           ease, status,
-        );
+        ].filter(Boolean));
       }
 
       OnTimeCard.on("ui/notifications/tool-result", (result) => {

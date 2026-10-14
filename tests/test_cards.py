@@ -88,6 +88,15 @@ def test_cards_render_the_tools_they_belong_to(base):
     assert "glide_preview" in timeline["text"] and "events" in timeline["text"]
 
 
+def test_cards_never_hand_empty_slots_to_the_page(base):
+    """replaceChildren prints a null as the word "null"; the Daylight Saving card showed it when no
+    Daylight Saving question was pending (found in a gallery screenshot, Oct 14)."""
+    for uri in (CHECKIN_CARD, TIMELINE_CARD):
+        [card] = rpc(base, "resources/read", {"uri": uri})["result"]["contents"]
+        for call in re.findall(r"replaceChildren\((.*?)\);", card["text"], re.S):
+            assert ": null" not in call or ".filter(Boolean)" in call, uri
+
+
 @pytest.mark.parametrize("name", ["sandbox.html", "apps-host.js"])
 def test_host_files_are_served(base, name):
     r = httpx.get(f"{base}/web/{name}", timeout=5)
