@@ -8,6 +8,8 @@ over Streamable HTTP, is written in Python, and can use Claude on Amazon Bedrock
 > Twice a year the clocks jump an hour, and every fall evening arrives a little sooner, but your
 > lights don't notice. On Time does.
 
+**Watch the demo video:** [youtu.be/rbvQR9fK9XE](https://youtu.be/rbvQR9fK9XE)
+
 ![Simulated On Time for Alexa+: a browser MCP client showing lights, check-ins with evidence, and the schedule](assets/web-client.png)
 
 Built for the *Build, Ship, Shape: Amazon Developer Hackathon*, **Alexa+ track**, with the
@@ -119,7 +121,7 @@ browser) and try:
 - `uv run on-time-seed --fresh --city London --region UK`: the clocks fall back on Oct 25, 2026.
 - `uv run on-time-seed --fresh --city Sydney --region Australia`: the clocks fall back on Apr 4, 2027.
 
-**Run the tests** with `uv run python -m pytest`. All 214 tests cover:
+**Run the tests** with `uv run python -m pytest`. All 215 tests cover:
 - MCP spec compliance, checked against a running server, plus an end-to-end run with the official
   MCP Python client (see [spec compliance](docs/spec-compliance.md));
 - sun times against reference data, and Daylight Saving edge cases;
