@@ -183,7 +183,8 @@ All settings are environment variables, and all are optional.
   suggestions.
 
 ## Built with
-Python · MCP Python SDK · Amazon Bedrock (Claude Haiku 4.5) · Agent Toolkit for AWS · astral ·
+Python (the MCP server) · HTML, CSS, and JavaScript (the on-screen cards and the Simulated On Time for
+Alexa+ page) · MCP Python SDK · Amazon Bedrock (Claude Haiku 4.5) · Agent Toolkit for AWS · astral ·
 GeoNames · SQLite · Web Speech API · Claude Code
 
 ## How it was built
