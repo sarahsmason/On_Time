@@ -3,7 +3,7 @@
 **An Alexa+ tool that keeps your lights in step with the sun, the seasons, and you.**
 
 On Time is a Model Context Protocol (MCP) server for smart lights. It follows MCP spec 2025-11-25
-over Streamable HTTP, is written in Python, and can use Claude on Amazon Bedrock.
+over Streamable HTTP and can use Claude on Amazon Bedrock.
 
 > Twice a year the clocks jump an hour, and every fall evening arrives a little sooner, but your
 > lights don't notice. On Time does.
