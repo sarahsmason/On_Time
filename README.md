@@ -31,7 +31,8 @@ On Time gives Alexa+ the tools to run your lights (on and off) on a smarter sche
 
 ## How it reaches Alexa+
 Amazon's Alexa+ add-on tools (the MCP Toolkit, the `alexa-ai` CLI, and the simulator) are a preview
-for select partners only, so a web page that acts as a real MCP client to test the concept.
+for select partners only, so this prototype uses a web page that acts as a real MCP client to test the
+concept.
 
 The demo runs in **Simulated On Time for Alexa+**, a page labelled that way on screen. It is a real
 MCP client in the browser (`initialize`, then `tools/list`, then `tools/call`, over Streamable HTTP),
