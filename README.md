@@ -31,12 +31,11 @@ On Time gives Alexa+ the tools to run your lights (on and off) on a smarter sche
 
 ## How it reaches Alexa+
 Amazon's Alexa+ add-on tools (the MCP Toolkit, the `alexa-ai` CLI, and the simulator) are a preview
-for select partners only, so no hackathon participant can connect a server to a real Alexa+ device.
-The hackathon FAQ says a web page that acts as a real MCP client meets the Alexa+ requirement.
+for select partners only, so a web page that acts as a real MCP client to test the concept.
 
-So the demo runs in **Simulated On Time for Alexa+**, a page labelled that way on screen. It is a real
+The demo runs in **Simulated On Time for Alexa+**, a page labelled that way on screen. It is a real
 MCP client in the browser (`initialize`, then `tools/list`, then `tools/call`, over Streamable HTTP),
-with Alexa-style voice and chat. Its **MCP protocol** panel shows every message as it happens. Claude
+with voice and chat. Its **MCP protocol** panel shows every message as it happens. Claude
 Haiku 4.5 on Amazon Bedrock chooses which tools to call; an offline agent runs the same demo without AWS.
 
 ```
